@@ -2,16 +2,15 @@ import time
 import random
 
 from opentelemetry import _logs
+from opentelemetry._logs import SeverityNumber
 from opentelemetry.sdk._logs import LoggerProvider
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
 
 
-
 exporter = OTLPLogExporter(
     endpoint="http://localhost:4318/v1/logs"
 )
-
 
 logger_provider = LoggerProvider()
 
@@ -37,35 +36,35 @@ while True:
     if event == "user_login":
 
         logger.emit(
-            severity_text="INFO",
+            severity_number=SeverityNumber.INFO,
             body="User logged in"
         )
 
     elif event == "payment_success":
 
         logger.emit(
-            severity_text="INFO",
+            severity_number=SeverityNumber.INFO,
             body="Payment completed successfully"
         )
 
     elif event == "payment_failed":
 
         logger.emit(
-            severity_text="WARN",
+            severity_number=SeverityNumber.WARN,
             body="Payment failed"
         )
 
     elif event == "database_error":
 
         logger.emit(
-            severity_text="ERROR",
+            severity_number=SeverityNumber.ERROR,
             body="Database connection failed"
         )
 
     elif event == "request_completed":
 
         logger.emit(
-            severity_text="INFO",
+            severity_number=SeverityNumber.INFO,
             body="Request completed"
         )
 

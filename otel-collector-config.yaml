@@ -19,6 +19,11 @@ receivers:
 processors:
 
   filter:
+    logs:
+      include:
+        severity_number:
+          min: WARN  #just keep logs from warning level and up,  droped info log severity (jsut for learning)
+
     metrics:   
       exclude:
         match_type: regexp
@@ -70,3 +75,4 @@ service:
     logs: 
       receivers: [otlp]
       exporters: [debug]
+      processors: [filter]
