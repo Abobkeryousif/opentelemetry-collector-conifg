@@ -17,6 +17,17 @@ receivers:
 
 
 processors:
+
+  filter:
+    metrics:   
+      exclude:
+        match_type: regexp
+        metric_names: 
+          - "^(python).*" #here i droped any metrics start with python, because i just need bussines logic metrics and drop system metrics for this case
+
+
+# can i add conifig like Include to just keep what i wont metrics,  Exclude to choose which metric should i droped, can apply this for all observability Signals
+
   batch:
     timeout: 10s # here the telemetry data collect and send to obser backend every 10s seconds,  this very good to prevent overwholm and hitting to backend 
     send_batch_size: 512 #instad of relaie on time, here we can relia with number of telemetry, every one of (M,L,T) number of it be 512 after that data send to backend
@@ -54,6 +65,7 @@ service:
     metrics:
       receivers: [otlp, prometheus]
       exporters: [debug]
+      processors: [filter, batch]
 
     logs: 
       receivers: [otlp]
