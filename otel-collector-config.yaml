@@ -1,0 +1,51 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+
+processors:
+  batch:
+    timeout: 10s # here the telemetry data collect and send to obser backend every 10s seconds,  this very good to prevent overwholm and hitting to backend 
+    send_batch_size: 512 #instad of relaie on time, here we can relia with number of telemetry, every one of (M,L,T) number of it be 512 after that data send to backend
+
+
+  attributes/add_env: # reason of this naming because we could have more then one attributes
+    actions:
+      - key: deployment.environment
+        value: production
+        action: insert  # insert here mean the colletctr will add this attribute if it does't exist, if already exist here will not added
+      
+      - key: service.region
+        value: us-west-2
+        action: upsert #upsert here will add attribute if does't exist, and if exist here will override value
+                       # we have alout of others actions like delete, update, hash!!, extract,...
+
+
+exporters:
+  otlp/jaeger:
+    endpoint: http://jaeger:4317
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes/add_env ,batch]  # we can add more than just one processors///    Order is very very important here and process run sequentialy
+      exporters: [debug, otlp/jaeger]
+      
+
+    metrics:
+      receivers: [otlp]
+      exporters: [debug]
+
+    logs: 
+      receivers: [otlp]
+      exporters: [debug]
