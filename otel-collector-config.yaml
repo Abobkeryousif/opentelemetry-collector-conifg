@@ -6,7 +6,7 @@ receivers:
         - job_name: "python-app"
           scrape_interval: 12s
           static_configs: 
-            - targets: ["python-app:8000"]
+            - targets: ["host.docker.internal:8000"]
 
   otlp:
     protocols:
@@ -19,16 +19,25 @@ receivers:
 processors:
 
   filter:
-    logs:
-      include:
-        severity_number:
-          min: WARN  #just keep logs from warning level and up,  droped info log severity (jsut for learning)
 
     metrics:   
       exclude:
         match_type: regexp
         metric_names: 
           - "^(python).*" #here i droped any metrics start with python, because i just need bussines logic metrics and drop system metrics for this case
+
+
+# can i add conifig like Include to just keep what i wont metrics,  Exclude to choose which metric should i droped, can apply this for all observability Signals
+    logs:
+      include:
+        severity_number:
+          min: WARN  #just keep logs from warning level and up,  droped info log severity (jsut for learning)
+
+    # metrics:   
+    #   exclude:
+    #     match_type: regexp
+    #     metric_names: 
+    #       - "^(python).*" #here i droped any metrics start with python, because i just need bussines logic metrics and drop system metrics for this case
 
 
 # can i add conifig like Include to just keep what i wont metrics,  Exclude to choose which metric should i droped, can apply this for all observability Signals
@@ -51,6 +60,10 @@ processors:
 
 
 exporters:
+
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+
   otlp/jaeger:
     endpoint: http://jaeger:4317
     tls:
@@ -69,8 +82,8 @@ service:
 
     metrics:
       receivers: [otlp, prometheus]
-      exporters: [debug]
-      processors: [filter, batch]
+      exporters: [prometheusremotewrite]
+      processors: [filter ,batch]
 
     logs: 
       receivers: [otlp]
